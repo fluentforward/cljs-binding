@@ -1,0 +1,9 @@
+pom.xml
+*jar
+/lib/
+/classes/
+.lein-deps-sum
+resources/public/cljs/
+.lein-plugins
+.lein-cljsbuild-compiler-0
+resources
