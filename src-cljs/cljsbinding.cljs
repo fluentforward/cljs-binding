@@ -64,4 +64,14 @@
   (reset! BindMonitor true)
 )
 
+(defn ^:export boot []
+ (js/eval "    
+    var deref = cljs.core.deref
+    cljs.core.deref = function (a) {
+     if (deref(cljsbinding.BindMonitor))
+       cljsbinding.register(a)
+     return deref(a)
+    }
+    cljsbinding.init()")
+)
 
