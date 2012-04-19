@@ -1,5 +1,5 @@
 (ns cljsbinding
-  (:use [jayq.core :only [$ attr val change]])
+  (:use [jayq.core :only [$ attr val change show hide]])
 )
 
 (def BindMonitor (atom false))
@@ -10,8 +10,21 @@
   (if (map? data) (make-js-map data) data)
 )
 
+(defn visible [elem v]
+  (if v (show elem) (hide elem))
+)
+
+(def bindings {"visible" visible})
+
+(defn bindfn [elem data]
+  (if (contains? bindings (first data)) 
+    #((bindings (first data)) elem (translate(js/eval (second data)))) 
+    #(.call (aget elem (first data)) elem (translate(js/eval (second data))))
+  )
+)
+
 (defn bind-elem [elem data]  
-  (let [f #(.call (aget elem (first data)) elem (translate(js/eval (second data))))]
+  (let [f (bindfn elem data) ]
     (reset! BindMonitor true)
     (reset! BindFn f)
     (f)
