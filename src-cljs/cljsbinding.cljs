@@ -1,10 +1,18 @@
 (ns cljsbinding
-  (:use [jayq.core :only [$ attr val change show hide]])
+  (:use [jayq.core :only [$ attr val change show hide append remove]])
 )
 
 (def BindMonitor (atom false))
 (def BindDependencies (atom {}))
 (def BindFn (atom nil))
+(def SeqContext (atom nil))
+
+(defn make-js-map
+  "makes a javascript map from a clojure one"
+  [cljmap]
+  (let [out (js-obj)]
+    (doall (map #(aset out (name (first %)) (second %)) cljmap))
+    out))
 
 (defn translate [data]
   (if (map? data) (make-js-map data) data)
@@ -14,12 +22,39 @@
   (if v (show elem) (hide elem))
 )
 
-(def bindings {"visible" visible})
+(defn checked [elem c]
+  (.removeAttr elem "checked")
+  (if c (attr elem "checked" "checked"))
+)
+
+(defn setclass [elem c]
+  (.removeClass elem)
+  (.addClass elem c)
+)
+
+(def bindings {"visible" visible "class" setclass "checked" checked})
+
+(defn in-bindseq? [elem]
+  (or
+    (> (count (.filter elem "*[bindseq]")) 0)
+    (> (count (.parents elem "*[bindseq]")) 0))
+)
+
+(defn valuefn [elem fnstr]
+  (reset! BindMonitor false)
+  (let [ctx @SeqContext]
+    (reset! BindMonitor true)    
+    (if (in-bindseq? elem) 
+      (translate (.call (js/eval fnstr) nil ctx))
+      (translate (js/eval fnstr))
+    )
+  )  
+)
 
 (defn bindfn [elem data]
   (if (contains? bindings (first data)) 
-    #((bindings (first data)) elem (translate(js/eval (second data)))) 
-    #(.call (aget elem (first data)) elem (translate(js/eval (second data))))
+    #((bindings (first data)) elem (valuefn elem (second data))) 
+    #(.call (aget elem (first data)) elem (valuefn elem (second data)))
   )
 )
 
@@ -30,13 +65,6 @@
     (f)
     (reset! BindMonitor false)
 ))
-
-(defn make-js-map
-  "makes a javascript map from a clojure one"
-  [cljmap]
-  (let [out (js-obj)]
-    (doall (map #(aset out (name (first %)) (second %)) cljmap))
-    out))
 
 (defn bind [elem]
  (doseq [data (.split (attr elem "bind") ";")] (bind-elem elem (.split data ":")))
@@ -50,9 +78,45 @@
   ))
 )
 
+(defn bindall [parent]
+  (let [seqs (.find parent "*[bindseq]") 
+        seqparents (seq (map #(.parent %) (.find parent "*[bindseq]")))
+       ]
+    (doseq [elem seqs] (remove elem))    
+    (doseq [elem (.filter parent "*[bind]")] (bind elem))
+    (doseq [elem (.find parent "*[bind]")] (bind elem))
+    (doseq [elem (.find parent "*[bindatom]")] (bindatom elem))
+    (doseq [[elem parent] (map list seqs seqparents)]
+      (bindseq elem parent)
+    )
+  )
+)
+
+(defn insert-seq-item [parent item elem]
+  (append parent elem)
+  (reset! SeqContext item)
+  (bindall elem)
+)
+
+(defn insertseq [seq parent template]
+  (remove (.children parent))
+  (doseq [item seq] (insert-seq-item parent item (.clone template)))
+)
+
+(defn bindseq [elem elparent]
+  (let [atom (js/eval (attr elem "bindseq"))]
+    (insertseq (deref atom) elparent elem)  
+    (add-watch atom :seq-binding-watch
+          (fn [key a old-val new-val] 
+            (insertseq new-val elparent elem)  
+          )
+        )
+  )
+)
+
+
 (defn ^:export init []
-  (doseq [elem ($ "*[bind]")] (bind elem))
-  (doseq [elem ($ "*[bindatom]")] (bindatom elem))
+  (bindall ($ "body"))
   )
 
 (defn seq-contains?
@@ -88,3 +152,13 @@
     cljsbinding.init()")
 )
 
+(defn ^:export uuid
+  "returns a type 4 random UUID: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+  []
+  (let [r (repeatedly 30 (fn [] (.toString (rand-int 16) 16)))]
+    (apply str (concat (take 8 r) ["-"]
+                       (take 4 (drop 8 r)) ["-4"]
+                       (take 3 (drop 12 r)) ["-"]
+                       [(.toString  (bit-or 0x8 (bit-and 0x3 (rand-int 15))) 16)]
+                       (take 3 (drop 15 r)) ["-"]
+                       (take 12 (drop 18 r))))))
