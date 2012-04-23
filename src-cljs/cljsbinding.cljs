@@ -1,4 +1,5 @@
 (ns cljsbinding
+  (:require [cljs.reader :as reader])
   (:use [jayq.core :only [$ attr val change show hide append remove]])
 )
 
@@ -162,3 +163,12 @@
                        [(.toString  (bit-or 0x8 (bit-and 0x3 (rand-int 15))) 16)]
                        (take 3 (drop 15 r)) ["-"]
                        (take 12 (drop 18 r))))))
+
+(defn ^:export bind-atom-to-localstorage [name atom]
+  (add-watch atom :binding-localstorage-watch
+          (fn [key a old-val new-val] 
+            (aset js/localStorage name (pr-str new-val))
+          )
+        )
+  (reset! atom (reader/read-string (aget js/localStorage name)))
+)                       
