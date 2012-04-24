@@ -6,7 +6,6 @@
 (def BindMonitor (atom false))
 (def BindDependencies (atom {}))
 (def BindFn (atom nil))
-(def SeqContext (atom nil))
 
 (defn make-js-map
   "makes a javascript map from a clojure one"
@@ -48,11 +47,10 @@
   )
 )
 
-(defn bindfn [elem data]
+(defn bindfn [elem data ctx]
   (reset! BindMonitor false)
   (let [bindingname (clojure.string/trim (first data)) 
-        fname (clojure.string/trim (second data))
-        ctx @SeqContext]
+        fname (clojure.string/trim (second data))]
     (reset! BindMonitor true)        
     (if (contains? bindings bindingname) 
       #((bindings bindingname) elem (valuefn elem fname ctx)) 
@@ -68,12 +66,12 @@
   (reset! BindMonitor false)
 )
 
-(defn bind-elem [elem data]  
-  (run-bind-fn (bindfn elem data))
+(defn bind-elem [elem data ctx]  
+  (run-bind-fn (bindfn elem data ctx))
 )
 
-(defn bind [elem]
- (doseq [data (.split (attr elem "bind") ";")] (bind-elem elem (.split data ":")))
+(defn bind [elem ctx]
+ (doseq [data (.split (attr elem "bind") ";")] (bind-elem elem (.split data ":") ctx))
 )
 
 (defn bindatom [elem]
@@ -85,13 +83,13 @@
   ))
 )
 
-(defn bindall [parent]
+(defn bindall [parent ctx]
   (let [seqs (.find parent "*[bindseq]") 
         seqparents (seq (map #(.parent %) (.find parent "*[bindseq]")))
        ]
     (doseq [elem seqs] (remove elem))    
-    (doseq [elem (.filter parent "*[bind]")] (bind elem))
-    (doseq [elem (.find parent "*[bind]")] (bind elem))
+    (doseq [elem (.filter parent "*[bind]")] (bind elem ctx))
+    (doseq [elem (.find parent "*[bind]")] (bind elem ctx))
     (doseq [elem (.find parent "*[bindatom]")] (bindatom elem))
     (doseq [[elem parent] (map list seqs seqparents)]
       (bindseq elem parent)
@@ -101,8 +99,7 @@
 
 (defn insert-seq-item [parent item elem]
   (append parent elem)
-  (reset! SeqContext item)
-  (bindall elem)
+  (bindall elem item)
 )
 
 (defn insertseq [seq parent template]
@@ -123,7 +120,7 @@
 
 
 (defn ^:export init []
-  (bindall ($ "body"))
+  (bindall ($ "body") nil)
   )
 
 (defn seq-contains?
