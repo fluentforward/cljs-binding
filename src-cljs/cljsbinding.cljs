@@ -53,9 +53,12 @@
 )
 
 (defn bindfn [elem data]
-  (if (contains? bindings (first data)) 
-    #((bindings (first data)) elem (valuefn elem (second data))) 
-    #(.call (aget elem (first data)) elem (valuefn elem (second data)))
+  (let [bindingname (clojure.string/trim (first data)) 
+        fname (clojure.string/trim (second data))]
+    (if (contains? bindings bindingname) 
+      #((bindings bindingname) elem (valuefn elem fname)) 
+      #(.call (aget elem bindingname) elem (valuefn elem fname))
+    )
   )
 )
 
