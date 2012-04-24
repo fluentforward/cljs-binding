@@ -41,23 +41,22 @@
     (> (count (.parents elem "*[bindseq]")) 0))
 )
 
-(defn valuefn [elem fnstr]
-  (reset! BindMonitor false)
-  (let [ctx @SeqContext]
-    (reset! BindMonitor true)    
-    (if (in-bindseq? elem) 
-      (translate (.call (js/eval fnstr) nil ctx))
-      (translate (js/eval fnstr))
-    )
-  )  
+(defn valuefn [elem fnstr ctx]
+  (if (in-bindseq? elem) 
+    (translate (.call (js/eval fnstr) nil ctx))
+    (translate (js/eval fnstr))
+  )
 )
 
 (defn bindfn [elem data]
+  (reset! BindMonitor false)
   (let [bindingname (clojure.string/trim (first data)) 
-        fname (clojure.string/trim (second data))]
+        fname (clojure.string/trim (second data))
+        ctx @SeqContext]
+    (reset! BindMonitor true)        
     (if (contains? bindings bindingname) 
-      #((bindings bindingname) elem (valuefn elem fname)) 
-      #(.call (aget elem bindingname) elem (valuefn elem fname))
+      #((bindings bindingname) elem (valuefn elem fname ctx)) 
+      #(.call (aget elem bindingname) elem (valuefn elem fname ctx))
     )
   )
 )
