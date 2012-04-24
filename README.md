@@ -8,13 +8,13 @@ cljs-binding makes it easy to bind html elements to ClojureScript functions.
 
 ### Simple binding
 
-In your view, add an element `[:p {:bind "text: sample.content()"}]`
+In your view, add an element `[:p {:bind "text: sample.content"}]`, or if you are coding straight html, then `<p bind="text: sample.content"></p>`
 
 The paragraphs text will be set to the return value of the `sample.content` javascript/ClojureScript function.
 
 If the ClojureScript sample.content function dereferences any atoms, then when the values of any of those atoms change, the text of the paragraph will be automatically updated.
 
-Multiple bindings can be specified e.g. `[:p {:bind "text: sample.content(); css: sample.contentcss()"}]`
+Multiple bindings can be specified e.g. `[:p {:bind "text: sample.content; css: sample.contentcss"}]`
 
 ### Binding atoms to inputs
 
