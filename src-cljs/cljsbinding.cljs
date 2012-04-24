@@ -44,7 +44,7 @@
 (defn valuefn [elem fnstr ctx]
   (if (in-bindseq? elem) 
     (translate (.call (js/eval fnstr) nil ctx))
-    (translate (js/eval fnstr))
+    (translate (.call (js/eval fnstr) nil))
   )
 )
 
@@ -61,20 +61,24 @@
   )
 )
 
+(defn run-bind-fn [f]
+  (reset! BindMonitor true)
+  (reset! BindFn f)
+  (f)
+  (reset! BindMonitor false)
+)
+
 (defn bind-elem [elem data]  
-  (let [f (bindfn elem data) ]
-    (reset! BindMonitor true)
-    (reset! BindFn f)
-    (f)
-    (reset! BindMonitor false)
-))
+  (run-bind-fn (bindfn elem data))
+)
 
 (defn bind [elem]
  (doseq [data (.split (attr elem "bind") ";")] (bind-elem elem (.split data ":")))
 )
 
 (defn bindatom [elem]
-  (bind-elem elem ["val" (str "cljs.core.deref.call(null," (attr elem "bindatom") ")") ])
+  (run-bind-fn #(.call (aget elem "val") elem (deref (js/eval (attr elem "bindatom")))))
+
   (.change elem #(
     (reset! (js/eval (attr elem "bindatom")) (.val elem))
     :false
