@@ -48,6 +48,8 @@ In this example there will be a list item for every item in the sequence contain
 
 For a more complete example, checkout the [todo example](https://github.com/fluentsoftware/cljs-binding/tree/master/examples/todo) project under examples. This is a completely client side example, so no web server, or hiccup, and demonstrates how you can use cljs-binding to create a todo application. This is based on the [TodoMVC](http://addyosmani.github.com/todomvc/) template.
 
+Click [here](http://fluentsoftware.github.com/cljs-binding/todo/index.html) to see the todo example running live
+
 ## Usage
 
 Update your project.clj to have a dependency on `fluentsoftware/cljs-binding "1.0.0.SNAPSHOT"`.
