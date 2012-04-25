@@ -26,7 +26,7 @@ In addition to supporting jQuery methods as keys, as shown above with text, css,
 
 ### Binding atoms to inputs
 
-As well as binding UI elements to functions that are dependent on atoms, atoms can also be bound to the value (or more specifically .`val()`) of an input `[:input {:bindatom "sample.MyAtom" :type "text"}]`, or `<input bindatom="sample.MyAtom" type="text">`. This is a two way binding, so not only will the input's value be updated whenever the atom change, whenever the input fires the `change` event, the atom will be reset to the new value of the input.
+As well as binding UI elements to functions that are dependent on atoms, atoms can also be bound to the value (or more specifically .`val()`) of an input `[:input {:bindatom "sample.MyAtom" :type "text"}]`, or `<input bindatom="sample.MyAtom" type="text">`. This is a two way binding, so not only will the input's value be updated whenever the atom changes, whenever the input fires the `change` event, the atom will be reset to the new value of the input.
 
 For checkbox inputs, special handling is applied, so that you can bind an atom with a boolean value in exactly the same way.
 
@@ -54,7 +54,7 @@ Click [here](http://fluentsoftware.github.com/cljs-binding/todo/index.html) to s
 
 Update your project.clj to have a dependency on `fluentsoftware/cljs-binding "1.0.0.SNAPSHOT"`.
 
-The clojure function `cljsbinding.core/init` will generate the appropriate javascript to initialise the cljs-binding client code if you are using hiccup to generate your html. If not, then simple call the cljsbinding.boot javascript function on page load.
+The clojure function `cljsbinding.core/init` will generate the appropriate javascript to initialise the cljs-binding client code if you are using hiccup to generate your html. If not, then simply call the cljsbinding.boot javascript function on page load.
 
 In your ClojureScript code, simply `:require [cljsbinding :as binding]` to ensure that cljsbinding client code is compiled in.
 
