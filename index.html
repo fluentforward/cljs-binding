@@ -59,7 +59,7 @@
 <li>checked - For checkbox elements, allows you to control whether a checkbox is checked from a function returning a boolean.</li>
 </ul><h3>Binding atoms to inputs</h3>
 
-<p>As well as binding UI elements to functions that are dependent on atoms, atoms can also be bound to the value (or more specifically .<code>val()</code>) of an input <code>[:input {:bindatom "sample.MyAtom" :type "text"}]</code>, or <code>&lt;input bindatom="sample.MyAtom" type="text"&gt;</code>. This is a two way binding, so not only will the input's value be updated whenever the atom change, whenever the input fires the <code>change</code> event, the atom will be reset to the new value of the input.</p>
+<p>As well as binding UI elements to functions that are dependent on atoms, atoms can also be bound to the value (or more specifically .<code>val()</code>) of an input <code>[:input {:bindatom "sample.MyAtom" :type "text"}]</code>, or <code>&lt;input bindatom="sample.MyAtom" type="text"&gt;</code>. This is a two way binding, so not only will the input's value be updated whenever the atom changes, whenever the input fires the <code>change</code> event, the atom will be reset to the new value of the input.</p>
 
 <p>For checkbox inputs, special handling is applied, so that you can bind an atom with a boolean value in exactly the same way.</p>
 
@@ -85,7 +85,7 @@
 
 <p>Update your project.clj to have a dependency on <code>fluentsoftware/cljs-binding "1.0.0.SNAPSHOT"</code>.</p>
 
-<p>The clojure function <code>cljsbinding.core/init</code> will generate the appropriate javascript to initialise the cljs-binding client code if you are using hiccup to generate your html. If not, then simple call the cljsbinding.boot javascript function on page load.</p>
+<p>The clojure function <code>cljsbinding.core/init</code> will generate the appropriate javascript to initialise the cljs-binding client code if you are using hiccup to generate your html. If not, then simply call the cljsbinding.boot javascript function on page load.</p>
 
 <p>In your ClojureScript code, simply <code>:require [cljsbinding :as binding]</code> to ensure that cljsbinding client code is compiled in.</p>
 
