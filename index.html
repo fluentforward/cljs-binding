@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Cljs-binding : A ClojureScript binding library" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cljs-binding</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/fluentsoftware/cljs-binding">Fork Me on GitHub</a>
+
+          <h1 id="project_title">Cljs-binding</h1>
+          <h2 id="project_tagline">A ClojureScript binding library</h2>
+
+          <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/fluentsoftware/cljs-binding/zipball/master">Download this project as a .zip file</a>
+            <a class="tar_download_link" href="https://github.com/fluentsoftware/cljs-binding/tarball/master">Download this project as a tar.gz file</a>
+          </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>cljs-binding</h1>
+
+<p>A ClojureScript binding library</p>
+
+<p>cljs-binding makes it easy to bind html elements to ClojureScript functions. </p>
+
+<h2>Examples</h2>
+
+<h3>Simple binding</h3>
+
+<p>In your view, add an element <code>[:p {:bind "text: sample.content"}]</code>, or if you are coding straight html, then <code>&lt;p bind="text: sample.content"&gt;&lt;/p&gt;</code></p>
+
+<p>The paragraphs text will be set to the return value of the <code>sample.content</code> javascript/ClojureScript function. Any jQuery method can be used as the key in the binding.</p>
+
+<p>If the ClojureScript sample.content function dereferences any atoms, then when the values of any of those atoms change, the text of the paragraph will be automatically updated.</p>
+
+<p>Multiple bindings can be specified e.g. <code>&lt;p bind="text: sample.content; css: sample.contentcss"&gt;&lt;/p&gt;</code></p>
+
+<h3>Binding keys</h3>
+
+<p>In addition to supporting jQuery methods as keys, as shown above with text, css, there are also some additional functions that make life easier:</p>
+
+<ul>
+<li>visible - Controls the visibility of the element using jQuery show and hide internally</li>
+<li>class - Removes all classes from the element, and sets the classes to whatever classes the function returns (as a space separated string)</li>
+<li>checked - For checkbox elements, allows you to control whether a checkbox is checked from a function returning a boolean.</li>
+</ul><h3>Binding atoms to inputs</h3>
+
+<p>As well as binding UI elements to functions that are dependent on atoms, atoms can also be bound to the value (or more specifically .<code>val()</code>) of an input <code>[:input {:bindatom "sample.MyAtom" :type "text"}]</code>, or <code>&lt;input bindatom="sample.MyAtom" type="text"&gt;</code>. This is a two way binding, so not only will the input's value be updated whenever the atom change, whenever the input fires the <code>change</code> event, the atom will be reset to the new value of the input.</p>
+
+<p>For checkbox inputs, special handling is applied, so that you can bind an atom with a boolean value in exactly the same way.</p>
+
+<h3>Sequences and loops</h3>
+
+<p>In addition to binding form input elements to atoms, you can also bind regions of html to an atom that is a sequence. This will clone the region of html for each item in the sequence. The region of html can also contain bindings. In this case, the binding functions will be called with a single parameter, which is the item from the sequence. This is best demonstrated with an example:</p>
+
+<pre><code>&lt;ul&gt;
+    &lt;li bindseq="sample.sequenceAtom"&gt;
+        &lt;i bind="text: sample.itemtext"&gt;&lt;/i&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;
+</code></pre>
+
+<p>In this example there will be a list item for every item in the sequence contained in the sample.sequenceAtom atom. The html will be automatically updated whenever the sequenceAtom is modified. The sample.itemtext function will be called with each item in the sequence.</p>
+
+<h2>Example project</h2>
+
+<p>For a more complete example, checkout the <a href="https://github.com/fluentsoftware/cljs-binding/tree/master/examples/todo">todo example</a> project under examples. This is a completely client side example, so no web server, or hiccup, and demonstrates how you can use cljs-binding to create a todo application. This is based on the <a href="http://addyosmani.github.com/todomvc/">TodoMVC</a> template.</p>
+
+<h2>Usage</h2>
+
+<p>Update your project.clj to have a dependency on <code>fluentsoftware/cljs-binding "1.0.0.SNAPSHOT"</code>.</p>
+
+<p>The clojure function <code>cljsbinding.core/init</code> will generate the appropriate javascript to initialise the cljs-binding client code if you are using hiccup to generate your html. If not, then simple call the cljsbinding.boot javascript function on page load.</p>
+
+<p>In your ClojureScript code, simply <code>:require [cljsbinding :as binding]</code> to ensure that cljsbinding client code is compiled in.</p>
+
+<h2>License</h2>
+
+<p>Copyright © 2012 Fluent Software Solutions Ltd</p>
+
+<p>Distributed under the Eclipse Public License, the same as Clojure.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cljs-binding maintained by <a href="https://github.com/fluentsoftware">fluentsoftware</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-24733923-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
