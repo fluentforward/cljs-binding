@@ -7,7 +7,7 @@
 (def edittodo (atom nil))
 (def checkall (atom false))
 
-(def todos (atom [{:id 1 :title "not done yet" :completed false} {:id 2 :title "done already" :completed true}]))
+(def todos (atom []))
 
 (defn ^:export todocount [] 
   (count @todos)
