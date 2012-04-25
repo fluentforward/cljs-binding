@@ -1,15 +1,13 @@
 # binding-todo
 
-I'm an app. Or maybe I'm a library? I haven't decided yet. 
-
-The choice is up to you!
+A simple example for the cljs-binding library based on the todo application template from [TodoMVC](http://addyosmani.github.com/todomvc/)
 
 ## Usage
 
-FIXME
+Run `lein cljsbuild once` to compile the ClojureScript, then simply open index.html
 
 ## License
 
-Copyright © 2012 FIXME
+Copyright © 2012 Fluent Software Solutions Ltd
 
 Distributed under the Eclipse Public License, the same as Clojure.
