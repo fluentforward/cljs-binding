@@ -54,7 +54,7 @@ Click [here](http://fluentsoftware.github.com/cljs-binding/todo/index.html) to s
 
 Update your project.clj to have a dependency on `fluentsoftware/cljs-binding "1.0.0.SNAPSHOT"`.
 
-The clojure function `cljsbinding.core/init` will generate the appropriate javascript to initialise the cljs-binding client code if you are using hiccup to generate your html. If not, then simply call the cljsbinding.boot javascript function on page load.
+The clojure function `cljsbinding.core/bind` will generate the appropriate javascript to initialise the cljs-binding client code if you are using hiccup to generate your html. If not, then simply call the cljsbinding.boot javascript function on page load.
 
 In your ClojureScript code, simply `:require [cljsbinding :as binding]` to ensure that cljsbinding client code is compiled in.
 
