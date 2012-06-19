@@ -1,5 +1,5 @@
-(defproject binding-todo "0.1.0-SNAPSHOT"
-  :description "Example TODO application demonstrating cljs-binding"
+(defproject binding-maptest "0.1.0-SNAPSHOT"
+  :description "Example demonstrating cljs-binding use of bindatom with maps"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
@@ -9,7 +9,7 @@
   :cljsbuild {
     :builds [{:source-path "src-cljs"
               :jar true
-              :compiler {:output-to "todo.js"
+              :compiler {:output-to "maptest.js"
                          :optimizations :whitespace
                          :pretty-print true}}]}  				 
 )

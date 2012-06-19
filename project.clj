@@ -2,8 +2,7 @@
   :description "ClojureScript binding library"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [jayq "0.1.0-alpha1"]]
-  :dev-dependencies [[lein-cljsbuild "0.1.9"]]
-  :plugins [[lein-cljsbuild "0.1.9"]]
+  :plugins [[lein-cljsbuild "0.2.1"]]
   :hooks [leiningen.cljsbuild]
   :cljsbuild {
     :builds [{:source-path "src-cljs"

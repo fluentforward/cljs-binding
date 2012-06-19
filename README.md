@@ -30,6 +30,8 @@ As well as binding UI elements to functions that are dependent on atoms, atoms c
 
 For checkbox inputs, special handling is applied, so that you can bind an atom with a boolean value in exactly the same way.
 
+If the atom is a map, then multiple input elements can be bound to the atom. In this case,  the id of the input element is used as the key to lookup the particular item in the map e.g. `<input bindatom="sample.myatom" type="text" id="mykey"` will bind the input to the item in the map with key `:mykey`. Again, this will be a two way binding, so whenever the input fires the change event, the atom will be updated with a new map.
+
 ### Sequences and loops
 
 In addition to binding form input elements to atoms, you can also bind regions of html to an atom that is a sequence. This will clone the region of html for each item in the sequence. The region of html can also contain bindings. In this case, the binding functions will be called with a single parameter, which is the item from the sequence. This is best demonstrated with an example:

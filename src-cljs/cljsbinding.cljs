@@ -74,22 +74,37 @@
  (doseq [data (.split (attr elem "bind") ";")] (bind-elem elem (.split data ":") ctx))
 )
 
+(defn atom-val [elem]
+  (let [aval (deref (js/eval (attr elem "bindatom")))]
+    (if (map? aval) 
+      (aval (keyword (attr elem "id")))
+      aval)
+  )
+)
+
+(defn reset-atom-val [elem atom val]
+  (if (map? @atom)
+    (swap! atom #(assoc % (keyword (attr elem "id")) val))
+    (reset! atom val)  
+  )  
+)
+
 (defn bind-input-atom [elem]
-  (run-bind-fn #(.call (aget elem "val") elem (deref (js/eval (attr elem "bindatom")))))
+  (run-bind-fn #(.call (aget elem "val") elem (atom-val elem)))
 
   (.change elem 
     (fn []
-      (reset! (js/eval (attr elem "bindatom")) (.val elem))
+      (reset-atom-val elem (js/eval (attr elem "bindatom")) (.val elem))
       false)
   )
 )
 
 (defn bind-checkbox-atom [elem]
-  (run-bind-fn #(checked elem (deref (js/eval (attr elem "bindatom")))))
+  (run-bind-fn #(checked elem (atom-val elem)))
 
   (.change elem 
     (fn []
-      (reset! (js/eval (attr elem "bindatom")) (.is elem ":checked"))
+      (reset-atom-val elem (js/eval (attr elem "bindatom")) (.is elem ":checked"))
       false)
     )
 )
