@@ -117,15 +117,15 @@
 )
 
 (defn bindall [parent ctx]
-  (let [seqs (.find parent "*[bindseq]") 
-        seqparents (seq (map #(.parent %) (.find parent "*[bindseq]")))
+  (let [seqs ($ (.find parent "*[bindseq]"))
+        seqparents (seq (map #(.parent ($ %)) ($ (.find parent "*[bindseq]"))))
        ]
-    (doseq [elem seqs] (remove elem))    
-    (doseq [elem (.filter parent "*[bind]")] (bind elem ctx))
-    (doseq [elem (.find parent "*[bind]")] (bind elem ctx))
-    (doseq [elem (.find parent "*[bindatom]")] (bindatom elem))
+    (doseq [elem seqs] (remove ($ elem)))
+    (doseq [elem (.filter parent "*[bind]")] (bind ($ elem) ctx))
+    (doseq [elem (.find parent "*[bind]")] (bind ($ elem) ctx))
+    (doseq [elem (.find parent "*[bindatom]")] (bindatom ($ elem)))
     (doseq [[elem parent] (map list seqs seqparents)]
-      (bindseq elem parent)
+      (bindseq ($ elem) parent)
     )
   )
 )
