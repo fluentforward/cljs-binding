@@ -33,6 +33,7 @@
 )
 
 (def bindings {"visible" visible "class" setclass "checked" checked})
+(def fnhandlers #{"click" "dblclick"})
 
 (defn in-bindseq? [elem]
   (or
@@ -40,11 +41,17 @@
     (> (count (.parents elem "*[bindseq]")) 0))
 )
 
-(defn valuefn [elem fnstr ctx]
+
+(defn valuefn [elem fnstr ctx bindingname]
+  (if (contains? fnhandlers bindingname)
+    (if (in-bindseq? elem) 
+      #(.call (js/eval fnstr) nil ctx)    
+      #(.call (js/eval fnstr) nil)
+    )
   (if (in-bindseq? elem) 
-    (translate (.call (js/eval fnstr) nil ctx))
+    (translate (.call (js/eval fnstr) nil ctx))    
     (translate (.call (js/eval fnstr) nil))
-  )
+  ))
 )
 
 (defn bindfn [elem data ctx]
@@ -53,8 +60,8 @@
         fname (clojure.string/trim (second data))]
     (reset! BindMonitor true)        
     (if (contains? bindings bindingname) 
-      #((bindings bindingname) elem (valuefn elem fname ctx)) 
-      #(.call (aget elem bindingname) elem (valuefn elem fname ctx))
+      #((bindings bindingname) elem (valuefn elem fname ctx bindingname)) 
+      #(.call (aget elem bindingname) elem (valuefn elem fname ctx bindingname))
     )
   )
 )

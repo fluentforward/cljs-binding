@@ -34,11 +34,11 @@
 )
 
 (defn ^:export clearcompleted []
-  #(swap! todos (partial filter pending))
+  (swap! todos (partial filter pending))
 )
 
 (defn ^:export removetodo [item]
-  (fn [] (swap! todos (partial remove #(= (:id item) (:id %)))))
+  (swap! todos (partial remove #(= (:id item) (:id %))))
 )
 
 (defn toggle [item]
@@ -51,16 +51,10 @@
   )))
 )
 
-(defn ^:export click-toggle [item]
-  #(toggle item)
-)
-
 (defn setediting [item]  
   (reset! editing (:id item))
   (reset! edittodo (:title item))
 )
-
-(defn ^:export edit [item] #(setediting item))
 
 (defn savechanges [item]
   (swap! todos (partial map (fn [x] 
@@ -96,8 +90,8 @@
   (if (= (:id item) @editing) "editing " "")
 )
 
-(defn ^:export click-check-all []
-  #(swap! todos (partial map (fn [x] 
+(defn ^:export check-all []
+  (swap! todos (partial map (fn [x] 
     (assoc x :completed @checkall)
   )))
 )
