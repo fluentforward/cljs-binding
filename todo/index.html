@@ -13,12 +13,12 @@
 			<input id="new-todo" placeholder="What needs to be done?" autofocus bind="keyup: todo.newkeyup" bindatom="todo.newtodo">
 		</header>		
 		<section id="main" bind="visible: todo.hastodos">
-			<input id="toggle-all" type="checkbox" bindatom="todo.checkall" bind="click: todo.click_check_all">
+			<input id="toggle-all" type="checkbox" bindatom="todo.checkall" bind="click: todo.check_all">
 			<label for="toggle-all">Mark all as complete</label>
 			<ul id="todo-list">
 				<li bindseq="todo.todos" bind="class: todo.classname">
-					<div class="view" bind="dblclick: todo.edit">
-						<input class="toggle" type="checkbox" bind="checked: todo.checked;click: todo.click_toggle">
+					<div class="view" bind="dblclick: todo.setediting">
+						<input class="toggle" type="checkbox" bind="checked: todo.checked;click: todo.toggle">
 						<label bind="text: todo.title"></label>
 						<button class="destroy" bind="click: todo.removetodo"></button>
 					</div>
