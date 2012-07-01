@@ -55,10 +55,8 @@
 )
 
 (defn bindfn [elem data ctx]
-  (reset! BindMonitor false)
   (let [bindingname (clojure.string/trim (first data)) 
         fname (clojure.string/trim (second data))]
-    (reset! BindMonitor true)        
     (if (contains? bindings bindingname) 
       #((bindings bindingname) elem (valuefn elem fname ctx bindingname)) 
       #(.call (aget elem bindingname) elem (valuefn elem fname ctx bindingname))
