@@ -121,7 +121,28 @@
   )  
 )
 
-(defn bindall [parent ctx]
+(defn insert-seq-item [parent item elem bindfn]
+  (append parent elem)
+  (bindfn elem item)
+)
+
+(defn insertseq [seq parent template bindfn]
+  (remove (.children parent))
+  (doseq [item seq] (insert-seq-item parent item (.clone template) bindfn))
+)
+
+(defn bindseq [elem elparent bindfn]
+  (let [atom (js/eval (attr elem "bindseq"))]
+    (insertseq (deref atom) elparent elem bindfn)  
+    (add-watch atom :seq-binding-watch
+          (fn [key a old-val new-val] 
+            (insertseq new-val elparent elem bindfn)  
+          )
+        )
+  )
+)
+
+(defn dobind [parent ctx]
   (let [seqs ($ (.find parent "*[bindseq]"))
         seqparents (seq (map #(.parent ($ %)) ($ (.find parent "*[bindseq]"))))
        ]
@@ -130,30 +151,14 @@
     (doseq [elem (.find parent "*[bind]")] (bind ($ elem) ctx))
     (doseq [elem (.find parent "*[bindatom]")] (bindatom ($ elem)))
     (doseq [[elem parent] (map list seqs seqparents)]
-      (bindseq ($ elem) parent)
+      (bindseq ($ elem) parent dobind)
     )
   )
 )
 
-(defn insert-seq-item [parent item elem]
-  (append parent elem)
-  (bindall elem item)
-)
-
-(defn insertseq [seq parent template]
-  (remove (.children parent))
-  (doseq [item seq] (insert-seq-item parent item (.clone template)))
-)
-
-(defn bindseq [elem elparent]
-  (let [atom (js/eval (attr elem "bindseq"))]
-    (insertseq (deref atom) elparent elem)  
-    (add-watch atom :seq-binding-watch
-          (fn [key a old-val new-val] 
-            (insertseq new-val elparent elem)  
-          )
-        )
-  )
+(defn ^:export bindall
+  ([elem] (dobind elem nil))
+  ([elem ctx] (dobind elem ctx))
 )
 
 
