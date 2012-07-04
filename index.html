@@ -91,6 +91,32 @@
 
 <p>In your ClojureScript code, simply <code>:require [cljsbinding :as binding]</code> to ensure that cljsbinding client code is compiled in.</p>
 
+<h2>Optimization</h2>
+
+<p>If you are setting the ClojureScript optimization level to advanced, then there a couple of things to be aware of</p>
+
+<p>1. You need to make sure the cljsbuild settings has externs for jquery e.g.</p>
+
+<pre><code>
+:cljsbuild {
+    :builds [{:source-path &quot;src-cljs&quot;
+              :jar true
+              :compiler {:output-to &quot;todo.js&quot;
+                         :optimizations :advanced
+                         :externs [&quot;externs/jquery.js&quot;]
+                         :pretty-print true}}]}  
+</code></pre>
+
+<p>2. Any atoms that you want to bind to need to have export set in the same way any functions you want to export to javascript e.g. </p>
+
+<pre><code>
+(def ^:export todos (atom []))
+
+(defn ^:export todocount [] 
+  (count @todos)
+)   
+</code></pre>
+
 <h2>License</h2>
 
 <p>Copyright © 2012 Fluent Software Solutions Ltd</p>
