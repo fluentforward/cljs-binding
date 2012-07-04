@@ -173,29 +173,30 @@
     false
     (reduce #(or %1 %2) (map #(= %1 item) sequence))))  
 
+(defn add-binding [atom m]
+  (assoc m atom (cons @BindFn (m atom)))
+)
+
+(defn run-bindings [key a old-val new-val]
+  (doseq [f (@BindDependencies a)] (f))
+)
+
 (defn ^:export register [atom]
   (reset! BindMonitor false)
-  (swap! BindDependencies
-    #(assoc % atom (if (contains? % atom) 
-      (cons @BindFn (% atom))
-      [@BindFn]))
-    )  
-  (add-watch atom :binding-watch
-          (fn [key a old-val new-val] 
-            (doseq [f (@BindDependencies a)] (f))
-          )
-        )
+  (swap! BindDependencies (partial add-binding atom))
+  (add-watch atom :binding-watch run-bindings)
   (reset! BindMonitor true)
 )
 
+(defn ^:export cljsderef [] cljs.core._deref)
+(defn ^:export shouldregister [drf] 
+(drf BindMonitor))
+
 (defn ^:export boot []
  (js/eval "    
-    var deref = cljs.core.deref
-    cljs.core.deref = function (a) {
-     if (deref(cljsbinding.BindMonitor))
-       cljsbinding.register(a)
-     return deref(a)
-    }
+    var derefName = eval('cljsbinding.cljsderef.toString().match(/return.(.*$)\\\\s/m)[1]')
+    var deref = eval(derefName)
+    eval(derefName +' = function (a) { if (cljsbinding.shouldregister(deref)) { cljsbinding.register(a) };return deref(a); }')
     cljsbinding.init()")
 )
 

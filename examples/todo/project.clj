@@ -10,6 +10,7 @@
     :builds [{:source-path "src-cljs"
               :jar true
               :compiler {:output-to "todo.js"
-                         :optimizations :whitespace
+                         :optimizations :simple
+                         :externs ["externs/jquery.js"]
                          :pretty-print true}}]}  				 
 )

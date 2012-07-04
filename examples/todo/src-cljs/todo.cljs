@@ -2,12 +2,11 @@
  (:require [cljsbinding :as binding])
 )
 
-(def newtodo (atom nil))
-(def editing (atom nil))
-(def edittodo (atom nil))
-(def checkall (atom false))
-
-(def todos (atom []))
+(def ^:export newtodo (atom nil))
+(def ^:export editing (atom nil))
+(def ^:export edittodo (atom nil))
+(def ^:export checkall (atom false))
+(def ^:export todos (atom []))
 
 (defn ^:export todocount [] 
   (count @todos)
@@ -41,7 +40,7 @@
   (swap! todos (partial remove #(= (:id item) (:id %))))
 )
 
-(defn toggle [item]
+(defn ^:export toggle [item]
   (reset! checkall false)
   (swap! todos (partial map (fn [x] 
     (if (= (:id x) (:id item)) 
@@ -51,12 +50,12 @@
   )))
 )
 
-(defn setediting [item]  
+(defn ^:export setediting [item]  
   (reset! editing (:id item))
   (reset! edittodo (:title item))
 )
 
-(defn savechanges [item]
+(defn ^:export savechanges [item]
   (swap! todos (partial map (fn [x] 
     (if (= (:id x) (:id item)) 
       (assoc item :title @edittodo)
