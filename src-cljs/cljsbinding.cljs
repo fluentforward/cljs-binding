@@ -54,13 +54,16 @@
   ))
 )
 
+(defn bind-elem [elem bindingname f]
+    (if (contains? bindings bindingname) 
+      #((bindings bindingname) elem (f)) 
+      #(.call (aget elem bindingname) elem (f))
+    ))
+
 (defn bindfn [elem data ctx]
   (let [bindingname (clojure.string/trim (first data)) 
         fname (clojure.string/trim (second data))]
-    (if (contains? bindings bindingname) 
-      #((bindings bindingname) elem (valuefn elem fname ctx bindingname)) 
-      #(.call (aget elem bindingname) elem (valuefn elem fname ctx bindingname))
-    )
+    (bind-elem elem bindingname #(valuefn elem fname ctx bindingname))
   )
 )
 
@@ -71,16 +74,16 @@
   (reset! BindMonitor false)
 )
 
-(defn bind-elem [elem data ctx]  
-  (run-bind-fn (bindfn elem data ctx))
+(defn bind-jq-elem
+  ([elem data ctx] (run-bind-fn (bindfn elem data ctx)))
 )
 
 (defn bind [elem ctx]
- (doseq [data (.split (attr elem "bind") ";")] (bind-elem elem (.split data ":") ctx))
+ (doseq [data (.split (attr elem "bind") ";")] (bind-jq-elem elem (.split data ":") ctx))
 )
 
-(defn atom-val [elem]
-  (let [aval (deref (js/eval (attr elem "bindatom")))]
+(defn atom-val [elem atm]
+  (let [aval (deref atm)]
     (if (map? aval) 
       (aval (keyword (attr elem "id")))
       aval)
@@ -94,31 +97,41 @@
   )  
 )
 
-(defn bind-input-atom [elem]
-  (run-bind-fn #(.call (aget elem "val") elem (atom-val elem)))
+(defn bind-input-atom [elem atm]
+  (run-bind-fn #(.call (aget elem "val") elem (atom-val elem atm)))
 
   (.change elem 
     (fn []
-      (reset-atom-val elem (js/eval (attr elem "bindatom")) (.val elem))
+      (reset-atom-val elem atm (.val elem))
       false)
   )
 )
 
-(defn bind-checkbox-atom [elem]
-  (run-bind-fn #(checked elem (atom-val elem)))
+(defn bind-checkbox-atom [elem atm]
+  (run-bind-fn #(checked elem (atom-val elem atm)))
 
   (.change elem 
     (fn []
-      (reset-atom-val elem (js/eval (attr elem "bindatom")) (.is elem ":checked"))
+      (reset-atom-val elem atm (.is elem ":checked"))
       false)
     )
 )
 
+(defn bind-text-atom [elem atm]
+  (run-bind-fn #(.call (aget elem "text") elem (atom-val elem atm))))
+
+(defn bind-elem-to-atom [elem atm]
+  (if (.is elem "input")
+      (if (= "checkbox" (attr elem "type"))
+          (bind-checkbox-atom elem atm)
+          (bind-input-atom elem atm)
+        )
+      (bind-text-atom elem atm)
+      ))
+
 (defn bindatom [elem]
-  (if (= "checkbox" (attr elem "type"))
-    (bind-checkbox-atom elem)
-    (bind-input-atom elem)
-  )  
+  (let [atm (js/eval (attr elem "bindatom"))]
+    (bind-elem-to-atom elem atm))  
 )
 
 (defn insert-seq-item [parent item elem bindfn]
