@@ -6,6 +6,8 @@
 (def BindMonitor (atom false))
 (def BindDependencies (atom {}))
 (def BindFn (atom nil))
+(def dynamic-bindings (atom {}))
+(def binding-key (atom 0))
 
 (defn make-js-map
   "makes a javascript map from a clojure one"
@@ -193,6 +195,20 @@
 (defn run-bindings [key a old-val new-val]
   (doseq [f (@BindDependencies a)] (f))
 )
+
+(defn next-binding-key [] (swap! binding-key inc))
+
+(defn register-bindingsource [source] 
+  (let [bindingkey (str (next-binding-key))]
+    (swap! dynamic-bindings #(assoc % bindingkey source))
+    bindingkey))
+
+(defn apply-bindingsource [elem bindingkey]
+  (doseq [source (@dynamic-bindings bindingkey)]
+    (if (map? source)
+      (doseq [[bindingname f] source] (bind-elem elem (name bindingname) f))    
+      (bind-elem-to-atom elem source))
+    ))
 
 (defn ^:export register [atom]
   (reset! BindMonitor false)
