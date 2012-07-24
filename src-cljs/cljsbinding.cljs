@@ -206,7 +206,7 @@
 (defn apply-bindingsource [elem bindingkey]
   (doseq [source (@dynamic-bindings bindingkey)]
     (if (map? source)
-      (doseq [[bindingname f] source] (bind-elem elem (name bindingname) f))    
+      (doseq [[bindingname f] source] (run-bind-fn (bind-elem elem (name bindingname) f)))    
       (bind-elem-to-atom elem source))
     ))
 
