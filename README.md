@@ -50,9 +50,9 @@ In this example there will be a list item for every item in the sequence contain
 
 cljs-binding provides a few functions that make it easy to dynamically create elements with bindings applied.
 
-### Dynamic binding
+### apply-binding
 
-The `apply-binding` function can be used to apply a binding to an element. apply-binding takes and element and the binding you wish to apply. The binding be an atom e.g.
+The `apply-binding` function can be used to apply a binding to an element. apply-binding takes an element and the binding you wish to apply. The binding can be an atom e.g.
 
 ```
 (def name (atom "matthew"))
@@ -61,7 +61,7 @@ The `apply-binding` function can be used to apply a binding to an element. apply
 
 ```
 
-In this case the atom will be bound to the input element as described above.
+In this case the atom will be bound to the input element as described above in Binding atoms to inputs.
 
 The binding can also be a map where the keys specify the binding key, and the values are the functions to be applied e.g.
 
@@ -70,6 +70,53 @@ The binding can also be a map where the keys specify the binding key, and the va
 (defn background-color [] (... some calculation for color ...))
 
 (apply-binding ($ "#myelem") {:text status-text :background background-color})
+```
+
+### Crate
+
+cljs-binding provides some helper functions and macros that make it easier to dynamically bind elements using the [crate](https://github.com/ibdknox/crate) library (a ClojureScript hiccup implementation)
+
+The function `cljsbinding.create/add-binding` can be used to dynamically add a binding. It works much in the same way as apply-binding does as described above, but instead of taking an jQuery element as it's first parameter, it takes the hiccup element. 
+
+In order for this to be correctly applied when the html is generated, a macro `cljsbinding.crate-macros/bound-html` is provided, which wraps a call to crate.core/html and in addition applies the registered bindings.
+
+Another helper macro `cljsbinding.crate-macros/insert-content` takes an id and hiccup elements, and appends those elements with bindings applied to the element with the given id.
+
+The example below illustrates how crate can be used to dynmically generate a form for all entries in a map:
+
+```
+(ns sample
+  (:use-macros [crate.def-macros :only [defpartial]]
+               [cljsbinding.crate-macros :only [insert-content]] )
+  (:require [cljsbinding :as binding]
+            [cljsbinding.crate :as bind-crate]
+            [crate.core :as crate]
+            )
+  (:use [jayq.core :only [$ attr val change show hide append remove]])
+)
+
+(def testatom (atom {:name "mr t" :phone "123456"}))
+
+(defn gen-form-input [atm k] 
+  [:div 
+    [:label (name k)]
+    (bind-crate/add-binding [:input {:id (name k)}] atm)]
+  )
+
+(defn gen-form [atm]
+  (map (partial gen-form-input atm) (keys @atm)))
+
+(defn phone-number [] (str "Tel: " (:phone @testatom)))
+
+(defn gen-content []
+  (insert-content "placeholder" 
+    [:div 
+      (gen-form testatom)
+      [:div "You can reach " 
+        (bind-crate/add-binding [:span {:id :name}] testatom) 
+        " on " 
+        (bind-crate/add-binding [:span] {:text phone-number})]
+    ]))
 ```
 
 ## Example projects
