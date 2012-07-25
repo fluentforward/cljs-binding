@@ -1,6 +1,6 @@
 # binding-maptest
 
-A simple example for the cljs-binding library showing how bindings can applied to content generated using crate.
+A simple example for the cljs-binding library showing how dynamic bindings can be applied
 
 ## Usage
 

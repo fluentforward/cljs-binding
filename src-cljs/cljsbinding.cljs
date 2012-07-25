@@ -203,12 +203,13 @@
     (swap! dynamic-bindings #(assoc % bindingkey source))
     bindingkey))
 
-(defn apply-bindingsource [elem bindingkey]
-  (doseq [source (@dynamic-bindings bindingkey)]
-    (if (map? source)
+(defn apply-binding [elem source] 
+  (if (map? source)
       (doseq [[bindingname f] source] (run-bind-fn (bind-elem elem (name bindingname) f)))    
-      (bind-elem-to-atom elem source))
-    ))
+      (bind-elem-to-atom elem source)))
+
+(defn apply-bindingsource [elem bindingkey]
+  (doseq [source (@dynamic-bindings bindingkey)] (apply-binding elem source)))
 
 (defn ^:export register [atom]
   (reset! BindMonitor false)

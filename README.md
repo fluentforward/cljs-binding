@@ -46,11 +46,39 @@ In addition to binding form input elements to atoms, you can also bind regions o
 
 In this example there will be a list item for every item in the sequence contained in the sample.sequenceAtom atom. The html will be automatically updated whenever the sequenceAtom is modified. The sample.itemtext function will be called with each item in the sequence.
 
-## Example project
+## Binding dynamically
+
+cljs-binding provides a few functions that make it easy to dynamically create elements with bindings applied.
+
+### Dynamic binding
+
+The `apply-binding` function can be used to apply a binding to an element. apply-binding takes and element and the binding you wish to apply. The binding be an atom e.g.
+
+```
+(def name (atom "matthew"))
+
+(apply-binding ($ "#myinput") name)
+
+```
+
+In this case the atom will be bound to the input element as described above.
+
+The binding can also be a map where the keys specify the binding key, and the values are the functions to be applied e.g.
+
+```
+(defn status-text [] (str "System status: " @status))
+(defn background-color [] (... some calculation for color ...))
+
+(apply-binding ($ "#myelem") {:text status-text :background background-color})
+```
+
+## Example projects
 
 For a more complete example, checkout the [todo example](https://github.com/fluentsoftware/cljs-binding/tree/master/examples/todo) project under examples. This is a completely client side example, so no web server, or hiccup, and demonstrates how you can use cljs-binding to create a todo application. This is based on the [TodoMVC](http://addyosmani.github.com/todomvc/) template.
 
 Click [here](http://fluentsoftware.github.com/cljs-binding/todo/index.html) to see the todo example running live
+
+There are [other examples](https://github.com/fluentsoftware/cljs-binding/tree/master/examples) which provide examples of binding to maps, and dynamic bindings.
 
 ## Usage
 

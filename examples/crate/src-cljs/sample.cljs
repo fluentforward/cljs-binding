@@ -8,7 +8,7 @@
   (:use [jayq.core :only [$ attr val change show hide append remove]])
 )
 
-(def ^:export testatom (atom {:name "mr t" :phone "123456"}))
+(def testatom (atom {:name "mr t" :phone "123456"}))
 
 (defn gen-form-input [atm k] 
   [:div 

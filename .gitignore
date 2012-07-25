@@ -11,3 +11,4 @@ resources
 target
 examples/todo/todo.js
 examples/crate/cratetest.js
+examples/dynamic/dynamic.js
