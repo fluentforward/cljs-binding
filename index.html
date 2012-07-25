@@ -78,10 +78,86 @@
 
 <p>In this example there will be a list item for every item in the sequence contained in the sample.sequenceAtom atom. The html will be automatically updated whenever the sequenceAtom is modified. The sample.itemtext function will be called with each item in the sequence.</p>
 
-<h2>Example project</h2>
+<h2>Binding dynamically</h2>
 
-<p>For a more complete example, checkout the <a href="https://github.com/fluentsoftware/cljs-binding/tree/master/examples/todo">todo example</a> project under examples. This is a completely client side example, so no web server, or hiccup, and demonstrates how you can use cljs-binding to create a todo application. This is based on the <a href="http://addyosmani.github.com/todomvc/">TodoMVC</a> template.</p>
-<p>Click <a href="todo/index.html">here</a> to see the todo example running live</p>
+<p>cljs-binding provides a few functions that make it easy to dynamically create elements with bindings applied.</p>
+
+<h3>apply-binding</h3>
+
+The <code>apply-binding</code> function can be used to apply a binding to an element. apply-binding takes an element and the binding you wish to apply. The binding can be an atom e.g.
+
+<pre><code>
+(def name (atom "matthew"))
+
+(apply-binding ($ "#myinput") name)
+
+</code></pre>
+
+<p>In this case the atom will be bound to the input element as described above in Binding atoms to inputs.</p>
+
+<p>The binding can also be a map where the keys specify the binding key, and the values are the functions to be applied e.g.</p>
+
+<pre><code>
+(defn status-text [] (str "System status: " @status))
+(defn background-color [] (... some calculation for color ...))
+
+(apply-binding ($ "#myelem") {:text status-text :background background-color})
+</code></pre>
+
+<h3>Crate</h3>
+
+<p>cljs-binding provides some helper functions and macros that make it easier to dynamically bind elements using the <a href='https://github.com/ibdknox/crate'>crate</a> library (a ClojureScript hiccup implementation)</p>
+
+<p>The function <code>cljsbinding.create/add-binding</code> can be used to dynamically add a binding. It works much in the same way as apply-binding does as described above, but instead of taking an jQuery element as it's first parameter, it takes the hiccup element. </p>
+
+<p>In order for this to be correctly applied when the html is generated, a macro <code>cljsbinding.crate-macros/bound-html</code> is provided, which wraps a call to crate.core/html and in addition applies the registered bindings.</p>
+
+<p>Another helper macro <code>cljsbinding.crate-macros/insert-content</code> takes an id and hiccup elements, and appends those elements with bindings applied to the element with the given id.</p>
+
+The example below illustrates how crate can be used to dynmically generate a form for all entries in a map:
+
+<pre><code>
+(ns sample
+  (:use-macros [crate.def-macros :only [defpartial]]
+               [cljsbinding.crate-macros :only [insert-content]] )
+  (:require [cljsbinding :as binding]
+            [cljsbinding.crate :as bind-crate]
+            [crate.core :as crate]
+            )
+  (:use [jayq.core :only [$ attr val change show hide append remove]])
+)
+
+(def testatom (atom {:name "mr t" :phone "123456"}))
+
+(defn gen-form-input [atm k] 
+  [:div 
+    [:label (name k)]
+    (bind-crate/add-binding [:input {:id (name k)}] atm)]
+  )
+
+(defn gen-form [atm]
+  (map (partial gen-form-input atm) (keys @atm)))
+
+(defn phone-number [] (str "Tel: " (:phone @testatom)))
+
+(defn gen-content []
+  (insert-content "placeholder" 
+    [:div 
+      (gen-form testatom)
+      [:div "You can reach " 
+        (bind-crate/add-binding [:span {:id :name}] testatom) 
+        " on " 
+        (bind-crate/add-binding [:span] {:text phone-number})]
+    ]))
+</code></pre>
+
+<h2>Example projects</h2>
+
+<p>For a more complete example, checkout the <a href='https://github.com/fluentsoftware/cljs-binding/tree/master/examples/todo'>todo example</a> project under examples. This is a completely client side example, so no web server, or hiccup, and demonstrates how you can use cljs-binding to create a todo application. This is based on the <a href='http://addyosmani.github.com/todomvc/'>TodoMVC</a> template.</p>
+
+<p>Click <a href='http://fluentsoftware.github.com/cljs-binding/todo/index.html'>here</a> to see the todo example running live</p>
+
+<p>There are <a href='https://github.com/fluentsoftware/cljs-binding/tree/master/examples'>other examples</a> which provide examples of binding to maps, and dynamic bindings.</p>
 
 <h2>Usage</h2>
 
