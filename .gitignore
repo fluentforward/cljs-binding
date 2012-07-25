@@ -10,3 +10,4 @@ resources
 .DS_Store
 target
 examples/todo/todo.js
+examples/crate/cratetest.js
