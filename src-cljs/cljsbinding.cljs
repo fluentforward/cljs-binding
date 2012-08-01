@@ -225,6 +225,8 @@
 (defn ^:export boot []
  (js/eval "    
     var derefName = eval('cljsbinding.cljsderef.toString().match(/return.(.*$)\\\\s/m)[1]')
+    if (derefName[derefName.length-1] == ';')
+      derefName = derefName.substr(0,derefName.length-1)
     var deref = eval(derefName)
     eval(derefName +' = function (a) { if (cljsbinding.shouldregister(deref)) { cljsbinding.register(a) };return deref(a); }')
     cljsbinding.init()")
@@ -247,5 +249,9 @@
             (aset js/localStorage name (pr-str new-val))
           )
         )
-  (reset! atom (reader/read-string (aget js/localStorage name)))
+  (let [storedValue (aget js/localStorage name)]
+    (if (not (nil? storedValue))
+      (reset! atom (reader/read-string storedValue))
+      )
+    )  
 )                       
