@@ -159,7 +159,7 @@
 
 (defn dobind [parent ctx]
   (let [seqs ($ (.find parent "*[bindseq]"))
-        seqparents (seq (map #(.parent ($ %)) ($ (.find parent "*[bindseq]"))))
+        seqparents (doall (map #(.parent ($ %)) ($ (.find parent "*[bindseq]"))))
        ]
     (doseq [elem seqs] (remove ($ elem)))
     (doseq [elem (.filter parent "*[bind]")] (bind ($ elem) ctx))
