@@ -123,7 +123,7 @@
   (run-bind-fn #(.call (aget elem "text") elem (atom-val elem atm))))
 
 (defn bind-elem-to-atom [elem atm]
-  (if (or (.is elem "input") (.is elem "textarea"))
+  (if (or (.is elem "input") (.is elem "textarea") (.is elem "select"))
       (if (= "checkbox" (attr elem "type"))
           (bind-checkbox-atom elem atm)
           (bind-input-atom elem atm)
