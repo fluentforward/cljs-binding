@@ -141,17 +141,29 @@
   (bindfn elem item)
 )
 
-(defn insertseq [seq parent template bindfn]
-  (remove (.children parent))
-  (doseq [item seq] (insert-seq-item parent item (.clone template) bindfn))
+(defn insertseq [templateid sequence parent template bindfn]
+  (remove (.children parent (str "[bind-template-id='" templateid "']")))
+  (doseq [item sequence] (insert-seq-item parent item (.attr (.clone template) "bind-template-id" templateid) bindfn))
 )
 
+(defn ^:export uuid
+  "returns a type 4 random UUID: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+  []
+  (let [r (repeatedly 30 (fn [] (.toString (rand-int 16) 16)))]
+    (apply str (concat (take 8 r) ["-"]
+                       (take 4 (drop 8 r)) ["-4"]
+                       (take 3 (drop 12 r)) ["-"]
+                       [(.toString  (bit-or 0x8 (bit-and 0x3 (rand-int 15))) 16)]
+                       (take 3 (drop 15 r)) ["-"]
+                       (take 12 (drop 18 r))))))
+
 (defn bindseq [elem elparent bindfn]
-  (let [atom (js/eval (attr elem "bindseq"))]
-    (insertseq (deref atom) elparent elem bindfn)  
+  (let [atom (js/eval (attr elem "bindseq"))
+        templateid (uuid)]    
+    (insertseq templateid (deref atom) elparent elem bindfn)  
     (add-watch atom :seq-binding-watch
           (fn [key a old-val new-val] 
-            (insertseq new-val elparent elem bindfn)  
+            (insertseq templateid new-val elparent elem bindfn)  
           )
         )
   )
@@ -231,17 +243,6 @@
     eval(derefName +' = function (a) { if (cljsbinding.shouldregister(deref)) { cljsbinding.register(a) };return deref(a); }')
     cljsbinding.init()")
 )
-
-(defn ^:export uuid
-  "returns a type 4 random UUID: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
-  []
-  (let [r (repeatedly 30 (fn [] (.toString (rand-int 16) 16)))]
-    (apply str (concat (take 8 r) ["-"]
-                       (take 4 (drop 8 r)) ["-4"]
-                       (take 3 (drop 12 r)) ["-"]
-                       [(.toString  (bit-or 0x8 (bit-and 0x3 (rand-int 15))) 16)]
-                       (take 3 (drop 15 r)) ["-"]
-                       (take 12 (drop 18 r))))))
 
 (defn ^:export bind-atom-to-localstorage [name atom]
   (add-watch atom :binding-localstorage-watch
