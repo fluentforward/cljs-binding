@@ -129,7 +129,7 @@ There are [other examples](https://github.com/fluentsoftware/cljs-binding/tree/m
 
 ## Usage
 
-Update your project.clj to have a dependency on `fluentsoftware/cljs-binding "1.0.0-SNAPSHOT"`.
+Update your project.clj to have a dependency on `fluentsoftware/cljs-binding "1.0.0"`.
 
 The clojure function `cljsbinding.core/bind` will generate the appropriate javascript to initialise the cljs-binding client code if you are using hiccup to generate your html. If not, then simply call the cljsbinding.boot javascript function on page load.
 
