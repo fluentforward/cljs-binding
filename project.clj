@@ -1,4 +1,4 @@
-(defproject fluentsoftware/cljs-binding "1.0.0-SNAPSHOT"
+(defproject fluentsoftware/cljs-binding "1.0.0"
   :description "ClojureScript binding library"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [jayq "0.1.0-alpha4"]]
