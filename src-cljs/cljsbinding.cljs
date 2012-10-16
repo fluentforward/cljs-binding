@@ -161,7 +161,7 @@
   (let [atom (js/eval (attr elem "bindseq"))
         templateid (uuid)]    
     (insertseq templateid (deref atom) elparent elem bindfn)  
-    (add-watch atom :seq-binding-watch
+    (add-watch atom templateid
           (fn [key a old-val new-val] 
             (insertseq templateid new-val elparent elem bindfn)  
           )
