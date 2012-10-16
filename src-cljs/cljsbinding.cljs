@@ -152,14 +152,15 @@
     (let [atm (js/eval (attr elem "bindatom"))]
       (bind-elem-to-atom elem atm ctx))))
 
-(defn insert-seq-item [parent item elem bindfn]
-  (append parent elem)
-  (bindfn elem item)
-)
+(defn insert-seq-item [template parent sibling item elem bindfn]
+  (if (= (.-length sibling) 1)
+    (.after sibling elem)
+    (append parent elem))
+  (bindfn elem item))
 
-(defn insertseq [templateid sequence parent template bindfn]
+(defn insertseq [templateid sequence parent sibling template bindfn]
   (remove (.children parent (str "[bind-template-id='" templateid "']")))
-  (doseq [item sequence] (insert-seq-item parent item (.attr (.clone template) "bind-template-id" templateid) bindfn))
+  (doseq [item sequence] (insert-seq-item template parent sibling item (.attr (.clone template) "bind-template-id" templateid) bindfn))
 )
 
 (defn ^:export uuid
@@ -176,15 +177,15 @@
 (defn parent-template-id [elem]
   (.attr (.parents ($ elem) "*[bind-template-id]") "bind-template-id"))
 
-(defn bindseq [elem elparent bindfn]
+(defn bindseq [elem elparent elsibling bindfn]
   (let [atom (js/eval (attr elem "bindseq"))
         templateid (uuid)]    
-    (insertseq templateid (deref atom) elparent elem bindfn)  
+    (insertseq templateid (deref atom) elparent elsibling elem bindfn)  
     (add-watch atom templateid
           (fn [key a old-val new-val] 
             (let [changing-input-template (if @changing-input (parent-template-id @changing-input) )]
               (if-not (= changing-input-template templateid)
-                (insertseq templateid new-val elparent elem bindfn)))
+                (insertseq templateid new-val elparent elsibling elem bindfn)))
           )
         )
   )
@@ -193,13 +194,14 @@
 (defn dobind [parent ctx]
   (let [seqs ($ (.find parent "*[bindseq]"))
         seqparents (doall (map #(.parent ($ %)) ($ (.find parent "*[bindseq]"))))
+        seqprevsiblings (doall (map #(.prev ($ %)) ($ (.find parent "*[bindseq]"))))
        ]
     (doseq [elem seqs] (remove ($ elem)))
     (doseq [elem (.filter parent "*[bind]")] (bind ($ elem) ctx))
     (doseq [elem (.find parent "*[bind]")] (bind ($ elem) ctx))
     (doseq [elem (.find parent "*[bindatom]")] (bindatom ($ elem) ctx))
-    (doseq [[elem parent] (map list seqs seqparents)]
-      (bindseq ($ elem) parent dobind)
+    (doseq [[elem parent sibling] (map list seqs seqparents seqprevsiblings)]
+      (bindseq ($ elem) parent sibling dobind)
     )
   )
 )
