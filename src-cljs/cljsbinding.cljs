@@ -89,7 +89,7 @@
   (let [aval (deref atm)]
     (cond 
       (map? aval) (aval (keyword (attr elem "id")))
-      (and (seq? aval) ctx) ((first (filter (fn [x] (= (x :id) (ctx :id))) aval)) (keyword (attr elem "id")))
+      (and (coll? aval) ctx) ((first (filter (fn [x] (= (x :id) (ctx :id))) aval)) (keyword (attr elem "id")))
       :else aval)
   )
 )
@@ -105,7 +105,7 @@
 (defn reset-atom-val [elem atom val ctx]
   (cond 
     (map? @atom) (swap! atom #(assoc % (keyword (attr elem "id")) val))
-    (and (seq? @atom) ctx) (swap! atom update-in-seq ctx (keyword (attr elem "id")) val)
+    (and (coll? @atom) ctx) (swap! atom update-in-seq ctx (keyword (attr elem "id")) val)
     :else (reset! atom val)  
   )  
 )
