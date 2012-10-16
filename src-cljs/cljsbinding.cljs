@@ -89,7 +89,10 @@
   (let [aval (deref atm)]
     (cond 
       (map? aval) (aval (keyword (attr elem "id")))
-      (and (coll? aval) ctx) ((first (filter (fn [x] (= (x :id) (ctx :id))) aval)) (keyword (attr elem "id")))
+      (and (coll? aval) ctx) 
+        (let [item (first (filter (fn [x] (= (x :id) (ctx :id))) aval))]
+          (if item
+            (item (keyword (attr elem "id")))))
       :else aval)
   )
 )
