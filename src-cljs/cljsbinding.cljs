@@ -8,6 +8,7 @@
 (def BindFn (atom nil))
 (def dynamic-bindings (atom {}))
 (def binding-key (atom 0))
+(def changing-input (atom nil))
 
 (defn make-js-map
   "makes a javascript map from a clojure one"
@@ -84,57 +85,72 @@
  (doseq [data (.split (attr elem "bind") ";")] (bind-jq-elem elem (.split data ":") ctx))
 )
 
-(defn atom-val [elem atm]
+(defn atom-val [elem atm ctx]
   (let [aval (deref atm)]
-    (if (map? aval) 
-      (aval (keyword (attr elem "id")))
-      aval)
+    (cond 
+      (map? aval) (aval (keyword (attr elem "id")))
+      (and (seq? aval) ctx) ((first (filter (fn [x] (= (x :id) (ctx :id))) aval)) (keyword (attr elem "id")))
+      :else aval)
   )
 )
 
-(defn reset-atom-val [elem atom val]
-  (if (map? @atom)
-    (swap! atom #(assoc % (keyword (attr elem "id")) val))
-    (reset! atom val)  
+(defn update-in-seq [currentseq ctx k v]
+  (doall (map (fn [item]
+    (if (= (item :id) (ctx :id)) 
+      (assoc item k v)
+      item
+      )
+    ) currentseq)))
+
+(defn reset-atom-val [elem atom val ctx]
+  (cond 
+    (map? @atom) (swap! atom #(assoc % (keyword (attr elem "id")) val))
+    (and (seq? @atom) ctx) (swap! atom update-in-seq ctx (keyword (attr elem "id")) val)
+    :else (reset! atom val)  
   )  
 )
 
-(defn bind-input-atom [elem atm]
-  (run-bind-fn #(.call (aget elem "val") elem (atom-val elem atm)))
+(defn bind-input-atom [elem atm ctx]
+  (run-bind-fn #(.call (aget elem "val") elem (atom-val elem atm ctx)))
 
   (.change elem 
     (fn []
-      (reset-atom-val elem atm (.val elem))
+      (reset! changing-input elem)
+      (reset-atom-val elem atm (.val elem) ctx)
+      (reset! changing-input nil)
       false)
   )
 )
 
-(defn bind-checkbox-atom [elem atm]
-  (run-bind-fn #(checked elem (atom-val elem atm)))
+(defn bind-checkbox-atom [elem atm ctx]
+  (run-bind-fn #(checked elem (atom-val elem atm ctx)))
 
   (.change elem 
     (fn []
-      (reset-atom-val elem atm (.is elem ":checked"))
+      (reset-atom-val elem atm (.is elem ":checked") ctx)
       false)
     )
 )
 
-(defn bind-text-atom [elem atm]
-  (run-bind-fn #(.call (aget elem "text") elem (atom-val elem atm))))
+(defn bind-text-atom [elem atm ctx]
+  (run-bind-fn #(.call (aget elem "text") elem (atom-val elem atm ctx))))
 
-(defn bind-elem-to-atom [elem atm]
+(defn bind-elem-to-atom [elem atm ctx]
   (if (or (.is elem "input") (.is elem "textarea") (.is elem "select"))
       (if (= "checkbox" (attr elem "type"))
-          (bind-checkbox-atom elem atm)
-          (bind-input-atom elem atm)
+          (bind-checkbox-atom elem atm ctx)
+          (bind-input-atom elem atm ctx)
         )
-      (bind-text-atom elem atm)
+      (bind-text-atom elem atm ctx)
       ))
 
-(defn bindatom [elem]
-  (let [atm (js/eval (attr elem "bindatom"))]
-    (bind-elem-to-atom elem atm))  
-)
+(defn bindatom 
+  ([elem]
+    (let [atm (js/eval (attr elem "bindatom"))]
+      (bind-elem-to-atom elem atm nil)))
+  ([elem ctx]
+    (let [atm (js/eval (attr elem "bindatom"))]
+      (bind-elem-to-atom elem atm ctx))))
 
 (defn insert-seq-item [parent item elem bindfn]
   (append parent elem)
@@ -157,13 +173,18 @@
                        (take 3 (drop 15 r)) ["-"]
                        (take 12 (drop 18 r))))))
 
+(defn parent-template-id [elem]
+  (.attr (.parents ($ elem) "*[bind-template-id]") "bind-template-id"))
+
 (defn bindseq [elem elparent bindfn]
   (let [atom (js/eval (attr elem "bindseq"))
         templateid (uuid)]    
     (insertseq templateid (deref atom) elparent elem bindfn)  
     (add-watch atom templateid
           (fn [key a old-val new-val] 
-            (insertseq templateid new-val elparent elem bindfn)  
+            (let [changing-input-template (if @changing-input (parent-template-id @changing-input) )]
+              (if-not (= changing-input-template templateid)
+                (insertseq templateid new-val elparent elem bindfn)))
           )
         )
   )
@@ -176,7 +197,7 @@
     (doseq [elem seqs] (remove ($ elem)))
     (doseq [elem (.filter parent "*[bind]")] (bind ($ elem) ctx))
     (doseq [elem (.find parent "*[bind]")] (bind ($ elem) ctx))
-    (doseq [elem (.find parent "*[bindatom]")] (bindatom ($ elem)))
+    (doseq [elem (.find parent "*[bindatom]")] (bindatom ($ elem) ctx))
     (doseq [[elem parent] (map list seqs seqparents)]
       (bindseq ($ elem) parent dobind)
     )
@@ -218,7 +239,7 @@
 (defn apply-binding [elem source] 
   (if (map? source)
       (doseq [[bindingname f] source] (run-bind-fn (bind-elem elem (name bindingname) f)))    
-      (bind-elem-to-atom elem source)))
+      (bind-elem-to-atom elem source nil)))
 
 (defn apply-bindingsource [elem bindingkey]
   (doseq [source (@dynamic-bindings bindingkey)] (apply-binding elem source)))
