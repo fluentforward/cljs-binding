@@ -8,6 +8,10 @@
 (def ^:export checkall (atom false))
 (def ^:export todos (atom []))
 
+(defn ^:export hascompleted []
+  (> (completedcount) 0)
+)
+
 (defn ^:export todocount [] 
   (count @todos)
 )
@@ -33,6 +37,7 @@
 )
 
 (defn ^:export clearcompleted []
+  (reset! checkall false)
   (swap! todos (partial filter pending))
 )
 

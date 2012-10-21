@@ -28,7 +28,7 @@
 		</section>		
 		<footer id="footer" bind="visible: todo.hastodos">
 			<span id="todo-count"><strong bind="text: todo.pendingcount"></strong> item left</span>			
-			<button id="clear-completed" bind="click: todo.clearcompleted">Clear completed <span bind="text:todo.completedcount"></span></button>
+			<button id="clear-completed" bind="visible: todo.hascompleted; click: todo.clearcompleted">Clear completed <span bind="text:todo.completedcount"></span></button>
 		</footer>
 	</section>
 	<footer id="info">
